@@ -1,6 +1,11 @@
 ## Log
 Notes in reverse chronological order
 
+### 2023-07-10 12:26:39 Failed attempt to swap to non-root users
+Lots of issues with features in devcontainers.json not working
+Currently works by using the `FROM mcr.microsoft.com/devcontainers/python:3.10` line which comes pre-built with a `vscode` user
+
+
 ### 2023-07-10 09:22:29 Setting up devcontainers 
 
 #### MWE complete

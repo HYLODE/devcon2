@@ -1,4 +1,5 @@
-FROM python:3.10.10
+# FROM python:3.10.10
+FROM mcr.microsoft.com/devcontainers/python:3.10
 
 SHELL ["/bin/bash", "-o", "pipefail", "-e", "-u", "-x", "-c"]
 
