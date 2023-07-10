@@ -11,8 +11,11 @@ RUN export DEBIAN_FRONTEND=noninteractive && \
 # Clean up after building.
 RUN  apt-get autoremove && apt-get clean && rm -rf /var/lib/apt/lists/*
 
+ENV PYTHONDONTWRITEBYTECODE=1
+ENV PYTHONUNBUFFERED=1
+
 # Upgrade pip 
-RUN pip install --upgrade pip 
+RUN python -m pip install --upgrade pip 
 # Copy and install requirements
 COPY requirements.txt /tmp/requirements.txt
-RUN pip install -r /tmp/requirements.txt && rm /tmp/requirements.txt
+RUN python -m pip install -r /tmp/requirements.txt 
