@@ -1,9 +1,21 @@
-from flask import Flask
+from flask import Flask, jsonify
+import requests
+
 app = Flask(__name__)
 
+BACKEND_URL = "http://localhost:8000"
+
+
 @app.route('/')
-def hello_world():
-    return "Hello, World! We're running full gas from a VSCode devcontainer"
+def index():
+    response = requests.get(f"{BACKEND_URL}/")
+    return jsonify(response.json()), response.status_code
+
+@app.route("/names/<string:name>")
+def get_name(name):
+    response = requests.get(f"{BACKEND_URL}/names/{name}")
+    return jsonify(response.json()), response.status_code
+
 
 if __name__ == "__main__":
-    app.run(host='0.0.0.0', port=8400, debug=True)
+    app.run(host='0.0.0.0', port=5100, debug=True)
