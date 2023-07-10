@@ -8,7 +8,8 @@
     "features": {
         // https://github.com/devcontainers/features/tree/main/src/python
         "ghcr.io/devcontainers/features/python:1": {
-            // You must specify "none" here else a different version of python will be installed over the one you've specified in Dockerfile
+            // You must specify "none" here else a different version of python
+            // will be installed over the one you've specified in Dockerfile
             "version": "none"
             // "installJupyterlab"
         }
@@ -16,9 +17,15 @@
     "customizations": {
         "vscode": {
             // extensions installed into devcontainer
-            "extensions": ["ms-azuretools.vscode-docker"]
+            "extensions": [
+                "ms-azuretools.vscode-docker",
+                "sleistner.vscode-fileutils"
+            ]
         }
     },
     // 8050 is the default dash port
-    "forwardPorts": [8400, 8050]
+    "forwardPorts": [
+        8400,
+        8050
+    ]
 }
