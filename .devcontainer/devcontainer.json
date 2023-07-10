@@ -1,0 +1,23 @@
+{
+    // could have used one of the default images instead
+    // see https://containers.dev/templates
+    "build": {
+        "dockerfile": "Dockerfile",
+        "context": ".."
+    },
+    "features": {
+        // https://github.com/devcontainers/features/tree/main/src/python
+        "ghcr.io/devcontainers/features/python:1": {
+            // Seems this is independent of the version specified in Dockerfile and would override the python install there
+            "version": "3.10.10"
+            // "installJupyterlab"
+        }
+    },
+    "customizations": {
+        "vscode": {
+            // extensions installed into devcontainer
+            "extensions": ["ms-azuretools.vscode-docker"]
+        }
+    },
+    "forwardPorts": [8400]
+}

@@ -1,0 +1,18 @@
+FROM python:3.10.10
+
+SHELL ["/bin/bash", "-o", "pipefail", "-e", "-u", "-x", "-c"]
+
+# Update and install vim
+RUN export DEBIAN_FRONTEND=noninteractive && \
+    export ACCEPT_EULA=Y && \
+    apt-get update && \
+    apt-get install --yes --no-install-recommends vim
+
+# Clean up after building.
+RUN  apt-get autoremove && apt-get clean && rm -rf /var/lib/apt/lists/*
+
+# Upgrade pip 
+RUN pip install --upgrade pip 
+# Copy and install requirements
+COPY requirements.txt /tmp/requirements.txt
+RUN pip install -r /tmp/requirements.txt && rm /tmp/requirements.txt
