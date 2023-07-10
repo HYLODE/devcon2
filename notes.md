@@ -1,6 +1,12 @@
 ## Log
 Notes in reverse chronological order
 
+### 2023-07-10 21:28:48 now try to set-up with docker compose
+just explored making edits to the dockerfile
+since the `./devcontainer/Dockerfile` is expressly for developing then it may be best to think of this as a development Docker image. In which case, it seems reasonable for it not to have a `CMD` or `ENTRYPOINT` since you're never calling it to 'do' anything
+
+
+
 ### 2023-07-10 12:26:39 Failed attempt to swap to non-root users
 Lots of issues with features in devcontainers.json not working
 Currently works by using the `FROM mcr.microsoft.com/devcontainers/python:3.10` line which comes pre-built with a `vscode` user

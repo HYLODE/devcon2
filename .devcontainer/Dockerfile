@@ -1,4 +1,4 @@
-# FROM python:3.10.10
+# Use MCR image - comes prebuilt with non-root user
 FROM mcr.microsoft.com/devcontainers/python:3.10
 
 SHELL ["/bin/bash", "-o", "pipefail", "-e", "-u", "-x", "-c"]
