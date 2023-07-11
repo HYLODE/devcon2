@@ -21,6 +21,7 @@ RUN python -m pip install --upgrade pip
 COPY requirements.txt /tmp/requirements.txt
 RUN python -m pip install -r /tmp/requirements.txt 
 
+WORKDIR /app
 COPY . .
 
-CMD ["uvicorn", "app:app", "--host", "0.0.0.0", "--port", "8301"]
+CMD ["./start"]

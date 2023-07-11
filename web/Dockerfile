@@ -21,6 +21,7 @@ RUN python -m pip install --upgrade pip
 COPY requirements.txt /tmp/requirements.txt
 RUN python -m pip install -r /tmp/requirements.txt 
 
+WORKDIR /app
 COPY . .
 
-CMD ["flask", "run", "--host=0.0.0.0", "--port=8300"]
+CMD ["./start"]

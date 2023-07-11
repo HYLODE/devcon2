@@ -1,6 +1,16 @@
 ## Log
 Notes in reverse chronological order
 
+### 2023-07-11 18:47:37 walkthrough the workflow 
+
+devcontainers
+- you can attached to an already running process; might be useful for debugging but not much use for development since the files are *inside* the container and not persisted externally
+- [open a folder in a prebuilt container](https://code.visualstudio.com/docs/devcontainers/containers#_quick-start-try-a-development-container): means all your tools are there but does not replicate the environment into which you will deploy
+
+
+1. Using VS Code alone, including starting the services
+2. Using VS Code after having started the services from the command line
+
 ### 2023-07-11 09:28:23 mwe with devcontainers and docker compose
 open vscode
 then follow the prompts to reopen in a devcontainer
