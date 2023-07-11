@@ -1,11 +1,15 @@
 ## Log
 Notes in reverse chronological order
 
+### 2023-07-10 23:10:59 mwe with fastapi and flask separately
+now need to stitch together using docker compose
+then convert to a devcontainer setup
+will need to think about which service you wish to focus on developing
+see also https://spin.atomicobject.com/2021/06/16/docker-development-container/
+
 ### 2023-07-10 21:28:48 now try to set-up with docker compose
 just explored making edits to the dockerfile
 since the `./devcontainer/Dockerfile` is expressly for developing then it may be best to think of this as a development Docker image. In which case, it seems reasonable for it not to have a `CMD` or `ENTRYPOINT` since you're never calling it to 'do' anything
-
-
 
 ### 2023-07-10 12:26:39 Failed attempt to swap to non-root users
 Lots of issues with features in devcontainers.json not working

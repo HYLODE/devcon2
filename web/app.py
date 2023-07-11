@@ -3,7 +3,8 @@ import requests
 
 app = Flask(__name__)
 
-BACKEND_URL = "http://localhost:8000"
+# NB: when running this with docker compose then must use the service name 'api' not 'localhost'
+BACKEND_URL = "http://api:8301"
 
 
 @app.route('/')
@@ -18,4 +19,4 @@ def get_name(name):
 
 
 if __name__ == "__main__":
-    app.run(host='0.0.0.0', port=5100, debug=True)
+    app.run(host='0.0.0.0', port=8300, debug=True)

@@ -1,0 +1,14 @@
+# docker-compose.yml
+version: '3.8'
+
+services:
+  api:
+    build: ./api
+    ports:
+      - "8301:8301"
+  web:
+    build: ./web
+    ports:
+      - "8300:8300"
+    depends_on:
+      - api
