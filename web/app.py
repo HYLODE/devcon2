@@ -1,10 +1,13 @@
 from flask import Flask, jsonify
 import requests
+import os
 
 app = Flask(__name__)
 
-# NB: when running this with docker compose then must use the service name 'api' not 'localhost'
-BACKEND_URL = "http://api:8301"
+# NB: when running this with docker compose then must use the service name 'api'
+# not 'localhost'
+API_PORT = os.environ.get("API_PORT", 8401)
+BACKEND_URL = f"http://api:{API_PORT}"
 
 
 @app.route('/')
