@@ -1,12 +1,11 @@
 #!/bin/bash
 # Starts a gunicorn server to run the dash/flask app
 
-if [ -z "WEB_PORT"]
-then
+if [ -z "WEB_PORT" ]; then
     echo "WEB_PORT is not set: will default to 8300"
 fi
 
 # Use port 8300 if not set
-PORT=${PORT:-8300}
+PORT=${WEB_PORT:-8300}
 # Bind to 0.0.0.0 not localhost else not visible outside container
 gunicorn app:app --reload --bind 0.0.0.0:${PORT}

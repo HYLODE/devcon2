@@ -1,16 +1,42 @@
 # docker-compose.yml
+x-http-proxy: &http-proxy ${HTTP_PROXY}
+x-https-proxy: &https-proxy ${HTTPS_PROXY}
+x-no-proxy: &no-proxy localhost,127.0.0.1,uclvlddpragae07,uclvlddpragae08,api,web,cache,baserow
+
+x-proxy-common: &proxy-common
+  HTTP_PROXY: *http-proxy
+  http_proxy: *http-proxy
+  HTTPS_PROXY: *https-proxy
+  https_proxy: *https-proxy
+  NO_PROXY: *no-proxy
+  no_proxy: *no-proxy
+
+x-build-args-common: &build-args-common
+  <<: *proxy-common
+  HYLODE_UID: ${HYLODE_UID}
+
 version: '3.8'
 
 services:
   api:
-    build: ./api
+    build: 
+      context: ./api
+      args:
+        <<: *build-args-common
+    environment:
+      <<: *proxy-common
     env_file: .env
     ports:
-      - "8301:8301"
+      - "${API_PORT}:${API_PORT}"
   web:
-    build: ./web
+    build: 
+      context: ./web
+      args:
+        <<: *build-args-common
+    environment:
+      <<: *proxy-common
     env_file: .env
     ports:
-      - "8300:8300"
+      - "${WEB_PORT}:${WEB_PORT}"
     depends_on:
       - api
