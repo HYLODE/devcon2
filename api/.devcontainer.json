@@ -51,7 +51,8 @@
             // extensions installed into devcontainer
             "extensions": [
                 "ms-azuretools.vscode-docker",
-                "sleistner.vscode-fileutils"
+                "sleistner.vscode-fileutils",
+				"tabnine.tabnine-vscode"
             ]
         }
 	}
