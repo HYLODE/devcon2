@@ -2,7 +2,7 @@
 
 DROP TABLE IF EXISTS names;
 -- Create table
-CREATE TABLE ids (
+CREATE TABLE tbl_ids_master (
     unid INT PRIMARY KEY,
     messagedatetime TIMESTAMP,
     messagetype VARCHAR(16),
