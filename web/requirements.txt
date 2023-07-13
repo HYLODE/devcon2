@@ -1,6 +1,7 @@
-altair
-pandas
-streamlit
-psycopg2-binary
-altair
-sqlalchemy
+arrow~=1.2.3
+altair~=5.0.1
+pandas~=2.0.3
+pandera~=0.15.2
+streamlit~=1.24.1
+psycopg2-binary~=2.9.6
+sqlalchemy~=2.0.18

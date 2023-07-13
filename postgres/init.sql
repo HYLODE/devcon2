@@ -1,9 +1,9 @@
 -- init.sql
 
-DROP TABLE IF EXISTS names;
+DROP TABLE IF EXISTS tbl_ids_master;
 -- Create table
 CREATE TABLE tbl_ids_master (
-    unid INT PRIMARY KEY,
+    unid INT, 
     messagedatetime TIMESTAMP,
     messagetype VARCHAR(16),
     senderapplication VARCHAR(180)

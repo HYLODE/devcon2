@@ -1,6 +1,38 @@
 ## Log
 Notes in reverse chronological order
 
+### 2023-07-14 10:32:56
+getting vscode to debug the streamlit app
+need to follow the same principles as for flask and create a launch.json file
+then `⌘-F5` will launch the app in debug mode with the port passed through so you can see the streamlit app running in your browser
+
+### 2023-07-14 08:39:22 using pyenv too!
+can't get tabnine to work within devcontainers
+
+```sh
+cd ./web
+pyenv install 3.10
+pyenv virtualenv 3.10 devcon2-web
+pyenv local devcon2-web
+pip install -r requirements.txt
+``
+
+not using https://github.com/wesselhuising/pandantic
+try https://pandera.readthedocs.io/en/latest/
+following https://aeturrell.github.io/coding-for-economists/data-advanced.html#pandera
+
+Note that it can be useful to stand up the other docker services during development as follows esp. the use of 2 compose.yml files in sequence
+
+```sh
+docker compose -f compose.yml -f compose.dev.yml up -d --build db synth
+```
+
+then using the vs code debugger
+...hmmm got stuck here
+
+
+
+
 ### 2023-07-11 18:47:37 walkthrough the workflow 
 
 devcontainers

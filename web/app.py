@@ -3,6 +3,7 @@ import time
 
 import altair as alt
 import pandas as pd
+import pandera as pa
 import sqlalchemy as sa
 import streamlit as st
 
@@ -18,7 +19,8 @@ st.set_page_config(
 # page so even if we specify the header and the footer now, and backwards the
 # footer will appear above the page content
 placeholder_for_header = st.empty()
-placeholder_for_header.header("Hello from Postgres")
+placeholder_for_header.header("EMAP IDS Monitor")
+st.write("IDS = Immutable Data Store")
 
 placeholder_for_content = st.empty()
 
@@ -38,7 +40,10 @@ def create_engine_ids():
 
 engine = create_engine_ids()
 
-query_window_seconds = 300
+sample_period = 15
+query_window_seconds = 60 * sample_period
+sample_period_str = f"{sample_period}S"
+
 q = f"""
 SELECT
  unid
@@ -50,18 +55,39 @@ WHERE messagedatetime > NOW() - INTERVAL '{query_window_seconds} SECONDS'
 ORDER BY unid DESC
 """
 
+# TODO: second plot to explore a more complete pull
+# TODO: polars
+
 while True:
+    # Load data
     df = pd.read_sql(q, engine)
-    df["messagedatetime"] = pd.to_datetime(df["messagedatetime"])
-    df_grouped = df.groupby(
-        pd.Grouper(key="messagedatetime", freq="5S")
-    ).size()  
+    # IDS stores datestimes naively - 
+    df["messagedatetime"] = pd.to_datetime(
+        df["messagedatetime"]).dt.round(sample_period_str
+        )
+
+    # Group and merge onto an axis running back from now
+    # Define now according to timezone, but then strip so the 'local' time is ready for merge
+    now = pd.Timestamp.now(tz="Europe/London").tz_localize(None)
+    time_skeleton = pd.Series(pd.date_range(
+        end=now, 
+        periods=int(query_window_seconds/sample_period),
+        freq=sample_period_str,
+        )).dt.round(sample_period_str)
+    time_skeleton.name = "messagedatetime"
+    
+    df_grouped = df.groupby([
+        "messagedatetime",
+        "senderapplication",
+    ]).size()  
     df_grouped = df_grouped.to_frame(name="n").reset_index()
 
+    df_chart = pd.merge(time_skeleton, df_grouped, how="left", on="messagedatetime")
+
     with placeholder_for_content.container():
-        # st.bar_chart(df_grouped)
+
         chart = (
-            alt.Chart(df_grouped)
+            alt.Chart(df_chart)
             .mark_bar()
             .encode(
                 alt.X(
@@ -69,12 +95,14 @@ while True:
                     axis=alt.Axis(format="%H:%M:%S"),
                     title="Message timestamp",
                 ),
-                alt.Y("n:Q"),
+                alt.Y("n:Q").title("Message count"),
+                color="senderapplication"
             )
         )
+
         st.altair_chart(chart)
         st.markdown("Most _recent_ values from the IDS!")
         st.dataframe(df.head(3))
         st.write("👆 ... these are rows from a Postgres Database")
 
-    time.sleep(5)
+    time.sleep(sample_period)

@@ -50,3 +50,5 @@ services:
   synth:
     build:
       context: ./synth
+    depends_on: 
+      - db
