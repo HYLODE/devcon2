@@ -1,4 +1,11 @@
 # streamlit_app.py
+"""
+Proof of principle streamlit app providing IDS monitoring as a side effect
+"""
+
+# TODO: implement view over time
+# TODO: implement basic authentication
+
 import time
 
 import altair as alt
@@ -7,6 +14,8 @@ import pandera as pa
 import sqlalchemy as sa
 import streamlit as st
 
+from pandera.typing import Series
+
 # Must be the first streamlit call in the app
 st.set_page_config(
     page_title="Ex-stream-ly Cool App",
@@ -14,16 +23,6 @@ st.set_page_config(
     layout="wide",
     initial_sidebar_state="expanded",
 )
-
-# The order of the calls to Streamlit defines the order of components on the
-# page so even if we specify the header and the footer now, and backwards the
-# footer will appear above the page content
-placeholder_for_header = st.empty()
-placeholder_for_header.header("EMAP IDS Monitor")
-st.write("IDS = Immutable Data Store")
-
-placeholder_for_content = st.empty()
-
 
 # Uses st.cache_resource to only run once.
 @st.cache_resource
@@ -38,42 +37,110 @@ def create_engine_ids():
     )
 
 
-engine = create_engine_ids()
+@st.cache_data
+def get_query_30d(_engine):
+    """
+    Return a summary of messages from the last 30d
+    """
+    q = sa.text("""
+    SELECT
+    DATE_TRUNC('hour', messagedatetime) AS hour
+    ,senderapplication
+    ,COUNT(*) AS n
+    FROM tbl_ids_master
+    WHERE messagedatetime > NOW() - INTERVAL '30 DAYS'
+    GROUP BY hour, senderapplication
+    ORDER BY hour, senderapplication
+    """)
+    return pd.read_sql(q, _engine)
 
-sample_period = 15
-query_window_seconds = 60 * sample_period
-sample_period_str = f"{sample_period}S"
 
-q = f"""
-SELECT
- unid
-,messagedatetime
-,messagetype
-,senderapplication
-FROM tbl_ids_master
-WHERE messagedatetime > NOW() - INTERVAL '{query_window_seconds} SECONDS'
-ORDER BY unid DESC
-"""
 
-# TODO: second plot to explore a more complete pull
-# TODO: polars
+def get_query_recent(_engine, query_window_seconds):
+    # Don't cache this else it won't update
+    # Prep the query and interpolate parameters safely
+    q = sa.text("""
+    SELECT
+    unid
+    ,messagedatetime
+    ,messagetype
+    ,senderapplication
+    FROM tbl_ids_master
+    WHERE messagedatetime > NOW() - INTERVAL ':query_window_seconds SECONDS'
+    ORDER BY unid DESC
+    """)
+    q = q.bindparams(query_window_seconds=query_window_seconds)
+    return pd.read_sql(q, _engine)
+
+class IdsShortSchema(pa.DataFrameModel):
+    """Define what you expect to be returned from the IDS"""
+
+    unid: Series[int]
+    messagedatetime: Series[pa.DateTime]
+    messagetype: Series[str]
+    senderapplication: Series[str]
+
+    @pa.check("messagedatetime", name="Assert timestamps are timezone naive")
+    def tz_naive_check(cls, col) -> bool:
+        """Timestamps must be timezone naive to match the specification in the IDS"""
+        if col.dt.tz is not None:
+            raise pa.errors.SchemaError()
+        return True
+
+ENGINE = create_engine_ids()
+SAMPLE_PERIOD = 15
+QUERY_WINDOW_SECONDS = 60 * SAMPLE_PERIOD
+SAMPLE_PERIOD_STR = f"{SAMPLE_PERIOD}S"
+
+df_30d = get_query_30d(ENGINE)
+
+chart_30d = (
+    alt.Chart(df_30d)
+    .mark_bar()
+    .encode(
+        alt.X(
+            "hour:T",
+            axis=alt.Axis(format="%Y-%m-%d"),
+            title="Message timestamp",
+        ),
+        alt.Y("n:Q").title("Message count"),
+        color=alt.Color("senderapplication").scale(
+            scheme="viridis"
+        )
+    )
+)
+
+
+# The order of the calls to Streamlit defines the order of components on the
+# page so even if we specify the header and the footer now, and backwards the
+# footer will appear above the page content
+st.header("EMAP Immutable Data Store monitor")
+st.write("The IDS is the log of HL7 messages captured by EMAP")
+
+col1, col2 = st.columns(2)
+
+with col1.container():
+    st.altair_chart(chart_30d)
+    st.markdown("Messages over the last 30 days")
+
+chart_now = col2.empty()
 
 while True:
     # Load data
-    df = pd.read_sql(q, engine)
+    df = get_query_recent(ENGINE, QUERY_WINDOW_SECONDS)
+    IdsShortSchema.validate(df)
     # IDS stores datestimes naively - 
     df["messagedatetime"] = pd.to_datetime(
-        df["messagedatetime"]).dt.round(sample_period_str
+        df["messagedatetime"]).dt.round(SAMPLE_PERIOD_STR
         )
 
-    # Group and merge onto an axis running back from now
-    # Define now according to timezone, but then strip so the 'local' time is ready for merge
+    # Need to produce a localized timestamp but with a type that does not hold the timezone information
     now = pd.Timestamp.now(tz="Europe/London").tz_localize(None)
     time_skeleton = pd.Series(pd.date_range(
         end=now, 
-        periods=int(query_window_seconds/sample_period),
-        freq=sample_period_str,
-        )).dt.round(sample_period_str)
+        periods=int(QUERY_WINDOW_SECONDS/SAMPLE_PERIOD),
+        freq=SAMPLE_PERIOD_STR,
+        )).dt.round(SAMPLE_PERIOD_STR)
     time_skeleton.name = "messagedatetime"
     
     df_grouped = df.groupby([
@@ -84,7 +151,7 @@ while True:
 
     df_chart = pd.merge(time_skeleton, df_grouped, how="left", on="messagedatetime")
 
-    with placeholder_for_content.container():
+    with chart_now.container():
 
         chart = (
             alt.Chart(df_chart)
@@ -96,13 +163,16 @@ while True:
                     title="Message timestamp",
                 ),
                 alt.Y("n:Q").title("Message count"),
-                color="senderapplication"
+                color=alt.Color("senderapplication").scale(
+                    scheme="viridis"
+                )
             )
         )
 
         st.altair_chart(chart)
-        st.markdown("Most _recent_ values from the IDS!")
+        st.markdown(f"Most _recent_ values from the IDS! Updates every {SAMPLE_PERIOD} seconds")
+        st.markdown("NB: Note the non-timezone aware timestamps 😔")
         st.dataframe(df.head(3))
-        st.write("👆 ... these are rows from a Postgres Database")
+        st.write("👆 Sample rows")
 
-    time.sleep(sample_period)
+    time.sleep(SAMPLE_PERIOD)

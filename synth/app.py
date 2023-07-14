@@ -1,5 +1,5 @@
 # streamlit_app.py
-import datetime
+import pandas as pd
 import time
 
 import random
@@ -33,9 +33,10 @@ senderapplications = (
 with engine.connect() as connection:
     while True:
         unid += 1
+        now = pd.Timestamp.now(tz="Europe/London").tz_localize(None)
         data = {
             'unid': unid,
-            "messagedatetime": datetime.datetime.now(),
+            "messagedatetime": now,
             "messagetype": random.choice(message_types),
             "senderapplication": random.choice(senderapplications),
         }

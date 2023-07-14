@@ -1,6 +1,10 @@
 ## Log
 Notes in reverse chronological order
 
+### 2023-07-14 12:56:15 using pandera to validate the sql query
+better use of sa.alchemy text to manage parameters
+defined a pandera data model and pa.check to ensure the data is timezone naive
+
 ### 2023-07-14 10:32:56
 getting vscode to debug the streamlit app
 need to follow the same principles as for flask and create a launch.json file
