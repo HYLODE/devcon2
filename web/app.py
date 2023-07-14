@@ -92,87 +92,124 @@ SAMPLE_PERIOD = 15
 QUERY_WINDOW_SECONDS = 60 * SAMPLE_PERIOD
 SAMPLE_PERIOD_STR = f"{SAMPLE_PERIOD}S"
 
-df_30d = get_query_30d(ENGINE)
+def check_password():
+    """Returns `True` if the user had the correct password."""
 
-chart_30d = (
-    alt.Chart(df_30d)
-    .mark_bar()
-    .encode(
-        alt.X(
-            "hour:T",
-            axis=alt.Axis(format="%Y-%m-%d"),
-            title="Message timestamp",
-        ),
-        alt.Y("n:Q").title("Message count"),
-        color=alt.Color("senderapplication").scale(
-            scheme="viridis"
+    def password_entered():
+        """Checks whether a password entered by the user is correct."""
+        try:
+            if st.session_state["password"] == st.secrets["password"]:
+                st.session_state["password_correct"] = True
+                # commented out to store the password
+                # del st.session_state["password"]  # don't store password
+            else:
+                st.session_state["password_correct"] = False
+        except KeyError as e:
+            st.warning("Password not set")
+            st.session_state["password_correct"] = False
+
+
+    st.header("Welcome to the EMAP monitoring dashboard")
+    if "password_correct" not in st.session_state:
+        # First run, show input for password.
+        st.text_input(
+            "Please enter the password", type="password", on_change=password_entered, key="password"
         )
-    )
-)
-
-
-# The order of the calls to Streamlit defines the order of components on the
-# page so even if we specify the header and the footer now, and backwards the
-# footer will appear above the page content
-st.header("EMAP Immutable Data Store monitor")
-st.write("The IDS is the log of HL7 messages captured by EMAP")
-
-col1, col2 = st.columns(2)
-
-with col1.container():
-    st.altair_chart(chart_30d)
-    st.markdown("Messages over the last 30 days")
-
-chart_now = col2.empty()
-
-while True:
-    # Load data
-    df = get_query_recent(ENGINE, QUERY_WINDOW_SECONDS)
-    IdsShortSchema.validate(df)
-    # IDS stores datestimes naively - 
-    df["messagedatetime"] = pd.to_datetime(
-        df["messagedatetime"]).dt.round(SAMPLE_PERIOD_STR
+        return False
+    elif not st.session_state["password_correct"]:
+        # Password not correct, show input + error.
+        st.text_input(
+            "Password", type="password", on_change=password_entered, key="password"
         )
+        st.error("😕 Password incorrect")
+        return False
+    else:
+        # Password correct.
+        return True
 
-    # Need to produce a localized timestamp but with a type that does not hold the timezone information
-    now = pd.Timestamp.now(tz="Europe/London").tz_localize(None)
-    time_skeleton = pd.Series(pd.date_range(
-        end=now, 
-        periods=int(QUERY_WINDOW_SECONDS/SAMPLE_PERIOD),
-        freq=SAMPLE_PERIOD_STR,
-        )).dt.round(SAMPLE_PERIOD_STR)
-    time_skeleton.name = "messagedatetime"
+if check_password():
     
-    df_grouped = df.groupby([
-        "messagedatetime",
-        "senderapplication",
-    ]).size()  
-    df_grouped = df_grouped.to_frame(name="n").reset_index()
+    df_30d = get_query_30d(ENGINE)
 
-    df_chart = pd.merge(time_skeleton, df_grouped, how="left", on="messagedatetime")
-
-    with chart_now.container():
-
-        chart = (
-            alt.Chart(df_chart)
-            .mark_bar()
-            .encode(
-                alt.X(
-                    "messagedatetime:T",
-                    axis=alt.Axis(format="%H:%M:%S"),
-                    title="Message timestamp",
-                ),
-                alt.Y("n:Q").title("Message count"),
-                color=alt.Color("senderapplication").scale(
-                    scheme="viridis"
-                )
+    chart_30d = (
+        alt.Chart(df_30d)
+        .mark_bar()
+        .encode(
+            alt.X(
+                "hour:T",
+                axis=alt.Axis(format="%Y-%m-%d"),
+                title="Message timestamp",
+            ),
+            alt.Y("n:Q").title("Message count"),
+            color=alt.Color("senderapplication").scale(
+                scheme="viridis"
             )
         )
+    )
 
-        st.altair_chart(chart)
-        st.markdown(f"Most _recent_ values from the IDS! Updates every {SAMPLE_PERIOD} seconds")
-        st.markdown("NB: Note the non-timezone aware timestamps 😔")
-        st.dataframe(df.head(3))
-        st.write("👆 Sample rows")
 
-    time.sleep(SAMPLE_PERIOD)
+    # The order of the calls to Streamlit defines the order of components on the
+    # page so even if we specify the header and the footer now, and backwards the
+    # footer will appear above the page content
+    st.header("EMAP Immutable Data Store monitor")
+    st.write("The IDS is the log of HL7 messages captured by EMAP")
+
+    col1, col2 = st.columns(2)
+
+    with col1.container():
+        st.altair_chart(chart_30d)
+        st.markdown("Messages over the last 30 days")
+
+    chart_now = col2.empty()
+
+    while True:
+        # Load data
+        df = get_query_recent(ENGINE, QUERY_WINDOW_SECONDS)
+        IdsShortSchema.validate(df)
+        # IDS stores datestimes naively - 
+        df["messagedatetime"] = pd.to_datetime(
+            df["messagedatetime"]).dt.round(SAMPLE_PERIOD_STR
+            )
+
+        # Need to produce a localized timestamp but with a type that does not hold the timezone information
+        now = pd.Timestamp.now(tz="Europe/London").tz_localize(None)
+        time_skeleton = pd.Series(pd.date_range(
+            end=now, 
+            periods=int(QUERY_WINDOW_SECONDS/SAMPLE_PERIOD),
+            freq=SAMPLE_PERIOD_STR,
+            )).dt.round(SAMPLE_PERIOD_STR)
+        time_skeleton.name = "messagedatetime"
+        
+        df_grouped = df.groupby([
+            "messagedatetime",
+            "senderapplication",
+        ]).size()  
+        df_grouped = df_grouped.to_frame(name="n").reset_index()
+
+        df_chart = pd.merge(time_skeleton, df_grouped, how="left", on="messagedatetime")
+
+        with chart_now.container():
+
+            chart = (
+                alt.Chart(df_chart)
+                .mark_bar()
+                .encode(
+                    alt.X(
+                        "messagedatetime:T",
+                        axis=alt.Axis(format="%H:%M:%S"),
+                        title="Message timestamp",
+                    ),
+                    alt.Y("n:Q").title("Message count"),
+                    color=alt.Color("senderapplication").scale(
+                        scheme="viridis"
+                    )
+                )
+            )
+
+            st.altair_chart(chart)
+            st.markdown(f"Most _recent_ values from the IDS! Updates every {SAMPLE_PERIOD} seconds")
+            st.markdown("NB: Note the non-timezone aware timestamps 😔")
+            st.dataframe(df.head(3))
+            st.write("👆 Sample rows")
+
+        time.sleep(SAMPLE_PERIOD)
