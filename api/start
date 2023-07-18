@@ -1,0 +1,10 @@
+#!/bin/bash
+# Starts a uvicorn server to run the FastAPI app
+
+if [ -z "API_PORT" ]; then
+    echo "API_PORT is not set: will default to 8301"
+fi
+
+# Use port 8301 if not set
+PORT=${API_PORT:-8301}
+uvicorn app:app --host 0.0.0.0  --port $PORT --reload

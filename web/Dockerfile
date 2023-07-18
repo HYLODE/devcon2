@@ -1,4 +1,5 @@
-FROM python:3.10.10
+# Use MCR image - comes prebuilt with non-root user
+FROM mcr.microsoft.com/devcontainers/python:3.10
 
 SHELL ["/bin/bash", "-o", "pipefail", "-e", "-u", "-x", "-c"]
 
@@ -19,3 +20,8 @@ RUN python -m pip install --upgrade pip
 # Copy and install requirements
 COPY requirements.txt /tmp/requirements.txt
 RUN python -m pip install -r /tmp/requirements.txt 
+
+WORKDIR /app
+COPY . .
+
+CMD ["./start"]
