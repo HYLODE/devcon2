@@ -3,9 +3,6 @@
 Proof of principle streamlit app providing IDS monitoring as a side effect
 """
 
-# TODO: implement view over time
-# TODO: implement basic authentication
-
 import time
 
 import altair as alt
@@ -21,7 +18,7 @@ st.set_page_config(
     page_title="Ex-stream-ly Cool App",
     page_icon="🧊",
     layout="wide",
-    initial_sidebar_state="expanded",
+    initial_sidebar_state="collapsed",
 )
 
 # Uses st.cache_resource to only run once.
