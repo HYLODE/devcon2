@@ -33,3 +33,22 @@ services:
     # Overrides default command so things don't shut down after the process ends.
     command: /bin/sh -c "while sleep 1000; do :; done"
  
+  # only needed for debugging
+  db:
+    build: 
+      context: ./postgres
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: demo
+    env_file: .env
+    ports:
+      - "${POSTGRES_PORT}:5432"
+    volumes:
+      - ./postgres/data:/data
+
+  synth:
+    build:
+      context: ./synth
+    depends_on: 
+      - db

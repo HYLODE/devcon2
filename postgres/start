@@ -1,0 +1,17 @@
+#!/bin/bash
+
+# Start PostgreSQL (the default entrypoint script, and it's already included in
+# the image)
+docker-entrypoint.sh postgres &
+
+# Wait for PostgreSQL to start
+until psql -U postgres -d demo -c '\l'; do
+  echo "PostgreSQL is unavailable - sleeping"
+  sleep 1
+done
+
+# Run the init.sql script
+psql -U postgres -d demo -a -f /scripts/init.sql
+
+# Keep the container running
+tail -f /dev/null

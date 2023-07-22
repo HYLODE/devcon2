@@ -12,13 +12,19 @@
 
 Assumes you have VScode installed with the [shell command `code` installed in your path](https://code.visualstudio.com/docs/setup/mac#_launching-from-the-command-line).
 
+### Setup environment variables and secrets
+
 Open a terminal and enter the following commands
 
 ```bash
 cd devcon2
 cp .env.example .env
+cp web/.streamlit/secrets.toml.example web/.streamlit/secrets.toml
 code .
 ```
+
+You'll likely need to edit both files on the host system to ensure you're working with the correct details.
+
 
 Then from VSCode, [open](https://code.visualstudio.com/docs/devcontainers/containers#_quick-start-open-an-existing-folder-in-a-container) this directory in its devcontainer, navigate to the VSCode terminal, and enter the following.
 
