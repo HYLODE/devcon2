@@ -1,1 +1,1 @@
-A web app, typically built using Plotly Dash.
+A web app for exploring streamlit

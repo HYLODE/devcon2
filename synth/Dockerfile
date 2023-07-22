@@ -28,6 +28,4 @@ RUN python -m pip install -r /tmp/requirements.txt
 WORKDIR /app
 COPY . .
 
-HEALTHCHECK CMD curl --fail http://localhost:${WEB_PORT}/_stcore/health
-# CMD [ "streamlit", "run", "app.py", "--server.port=${WEB_PORT}", "--server.address=0.0.0.0" ]
 CMD ["./start"]
