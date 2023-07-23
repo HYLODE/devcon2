@@ -53,11 +53,15 @@ ce1 = col1.empty()
 ce2 = col2.empty()
 
 # Load data
-response = requests.get("http://api:8401/discharges/predictions/")
-data = response.json()
-i = 0
+# response = requests.get("http://api:8401/discharges/predictions/")
+# data = response.json()
+# i = 0
 
 while True:
+    # this is a terrible quick hack just to do live updates
+    response = requests.get("http://api:8401/discharges/predictions/")
+    data = response.json()
+    i = 0
     with ce1.container():
         st.header("Prediction")
         now = arrow.utcnow().to("Europe/London").format("D MMM, h:ma")
