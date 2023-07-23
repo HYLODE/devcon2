@@ -50,9 +50,9 @@
         "vscode": {
             // extensions installed into devcontainer
             "extensions": [
-                "ms-azuretools.vscode-docker"
+                  "ms-azuretools.vscode-docker"
                 , "sleistner.vscode-fileutils"
-				// ,"tabnine.tabnine-vscode"
+				, "ms-python.isort"
             ]
         }
 	}
