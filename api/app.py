@@ -32,7 +32,7 @@ def discharges_predictions():
     ```
     """
     try:
-        response = requests.get("http://uclvlddpragae08:5691")
+        response = requests.get("http://uclvlddpragae08:5691/predictions")
         data = response.json()
     except requests.exceptions.ConnectionError as e:
         print(e)
